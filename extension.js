@@ -82,7 +82,6 @@ async function queryApi(text) {
                 vscode.window.showErrorMessage(
                     `Error querying OpenAI API: ${error.message}`
                 );
-                console.error(error);
                 console.error(error.response.data);
             }
         );
