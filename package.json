@@ -2,7 +2,8 @@
     "name": "vscode-gpt-automate",
     "displayName": "VSCode GPT Automate",
     "description": "Automate tasks by prompting ChatGPT to interact with your workspace.",
-    "version": "0.2.1",
+    "version": "0.2.3",
+    "author": "Ethan Rettinger",
     "engines": {
         "vscode": "^1.73.0"
     },

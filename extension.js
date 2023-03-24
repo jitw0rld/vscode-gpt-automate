@@ -8,7 +8,7 @@ const configuration = new openai.Configuration({
 const openapi = new openai.OpenAIApi(configuration);
 const path = require('path');
 let workspaceFiles = '';
-const PRE_PROMPT = `You are converting text into automation commands. Here are the 6 possible commands:
+const PRE_PROMPT = `You are converting prompts into commands. Here are the 6 possible commands:
 
 'NEW_FILE "path/to/file.txt"',
 'NEW_FOLDER "path/to/folder"',
@@ -17,9 +17,17 @@ const PRE_PROMPT = `You are converting text into automation commands. Here are t
 'EXECUTE_COMMAND "shell_command"'
 'INVALID_REQUEST "reason"'
 
-DO NOT reply with anything other than those commands. You can work in any programming language needed.
-If parts text cannot be converted into one of those commands, write INVALID_REQUEST "reason".
-Add files according to what is needed in the prompt. Commands are delimited with ~.
+DO NOT reply with anything other than those 6 commands. You can reply with any command to obey the prompt for EXECUTE_COMMAND.
+The user does not need to be specific so fill in all gaps with reasonable assumptions.
+If parts of text cannot be converted into one of those commands, write INVALID_REQUEST "(reason)" and explain why.
+Add files according to what is needed in the prompt. Commands are delimited with "~."
+Folders are created recursively.
+If file or folder names are not given, make appropriate assumptions about what to create.
+Prefix unspecified paths with ./ because the current working directory is where files will be created.
+Do not add single quotes to code or file names. Try to format all code correctly.
+The user does not need to be specific. Fill in all gaps with reasonable assumptions.
+Do not minify code, try to format it as much as possible with tabs and newline chars. 
+
 Example prompt: "Setup the files for an express app in nodejs."
 NEW_FOLDER "./public"~.NEW_FOLDER "./public/css"~.NEW_FOLDER "./public/js"~.NEW_FILE "./public/index.html"~.NEW_FILE "./public/js/script.js"~.NEW_FILE "./public/css/styles.css"~.WRITE_TO_FILE "./public/index.html" "<h1>My Example Application</h1>"~.WRITE_TO_FILE "./public/js/script.js" "console.log('Hello, world!');"~.WRITE_TO_FILE "./public/css/styles.css" "body { background-color: #000; }"~.EXECUTE_COMMAND "npm init -y"~.EXECUTE_COMMAND "npm install express"~.NEW_FILE "./index.js"
 
@@ -27,9 +35,7 @@ Example 2: "Initialize a C app"
 NEW_FOLDER "./c-app"~.NEW_FILE "./c-app/main.c"~.WRITE_TO_FILE "./c-app/main.c" "int #include <stdio.h>\nint main() {\n\tprintf("Hello, world!");\n\n\treturn 0;\n}"\n
 `;
 
-let CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}
-Newline Character to use in prompt: ${os.EOL}
-`;
+let CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}`;
 
 /**
  * @param {{ subscriptions: vscode.Disposable[]; }} context
@@ -65,14 +71,9 @@ async function queryApi(text) {
             messages: [
                 {
                     role: 'user',
-                    content: PRE_PROMPT + CTX_PROMPT
-                },
-                {
-                    role: 'user',
-                    content: `Your Prompt: ${text}`
+                    content: PRE_PROMPT + CTX_PROMPT + ` Your Prompt: ${text}`
                 }
-            ],
-            max_tokens: 3000
+            ]
         })
         .then(
             data => {
@@ -82,6 +83,7 @@ async function queryApi(text) {
                 vscode.window.showErrorMessage(
                     `Error querying OpenAI API: ${error.message}`
                 );
+                console.log('\n\nERROR QUERYING OPENAI vvvvvvvvv\n\n');
                 console.error(error.response.data);
             }
         );
@@ -208,11 +210,7 @@ async function handleDelFileCommand(filePath) {
         const rootFolder = workspaceFolders[0].uri;
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
         await vscode.workspace.fs.delete(fileUri, { recursive: false }).then(
-            () => {
-                vscode.window.showInformationMessage(
-                    `Deleted file ${filePath}`
-                );
-            },
+            () => {},
             error => {
                 vscode.window.showErrorMessage(
                     `Error deleting file ${filePath}: ${error.message}`
@@ -231,11 +229,7 @@ async function handleWriteToFileCommand(filePath, content) {
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
         const contentBytes = new TextEncoder().encode(content);
         await vscode.workspace.fs.writeFile(fileUri, contentBytes).then(
-            () => {
-                vscode.window.showInformationMessage(
-                    `Wrote to file ${filePath}`
-                );
-            },
+            () => {},
             error => {
                 vscode.window.showErrorMessage(
                     `Error writing to file ${filePath}: ${error.message}`
@@ -275,20 +269,11 @@ async function getWorkspaceFiles() {
     });
 
     const workspaceFiles = `${fileNames.join('\n')}\n`;
-    CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}
-Newline Character to use in prompt: ${os.EOL}`;
+    CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}`;
     console.log('Workspace Files:' + workspaceFiles);
 }
 
 getWorkspaceFiles();
-
-vscode.workspace.onDidChangeWorkspaceFolders(() => {
-    getWorkspaceFiles();
-});
-
-vscode.workspace.onDidChangeTextDocument(() => {
-    getWorkspaceFiles();
-});
 
 exports.activate = activate;
 exports.queryApi = queryApi;
