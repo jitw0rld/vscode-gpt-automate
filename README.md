@@ -11,14 +11,16 @@ Automatically perform actions with ChatGPT-turbo-3.5. Please do not steal my api
 -   Run commands, files and programs automatically
 -   Create a workspace
 -   Works in any language (But you **MUST** be specific!)
+-   Can see the file names of all files in your workspace (excluding node_modules because it is too large)
 
 ### Limitation:
 
--   It can not view your project structure or any code in the project **(WORK IN PROGRESS)**
+-   It can not view code in any of your files
 -   It can only write so much text in files in one prompt
 -   It has a tendency to reject prompts, even if they are good. Try to word it a little differently and be more verbose.
 -   It can not work with files outside of the workspace
 -   It has a tendency to reject prompts not JavaScript or C related due to the pre-prompt included in the code. This just means be more verbose and it will likely work.
+-   Prompt max length can be reached if you have a very large workspace. This is being fixed.
 
 ## How to Install
 
@@ -39,6 +41,7 @@ Automatically perform actions with ChatGPT-turbo-3.5. Please do not steal my api
 5. Type your prompt
 6. Press Enter
 7. If your prompt is rejected you will get an INVALID_REQUEST error, so try again.
+8. If your prompt contains swears or is very long OR if your workspace is very large (file-count wise) you will get a 400 error from OpenAI. Fix is being implemented
 
 ## How to write Good Prompts
 
@@ -53,6 +56,7 @@ Automatically perform actions with ChatGPT-turbo-3.5. Please do not steal my api
 -   Make a website in HTML with a few buttons on it that when clicked alert babbur
 -   Make a file called main.py, write a program in Python that says babbur 1,000 times, and run it
 -   Make a file called main.js, write a program in JavaScript that says babbur 1,000 times, and run it
+-   Delete all files in my workspace besides 'index.js' and 'main.js' and make a file called 'index.js' that says babbur 1,000 times and run it
 
 ### Bad Prompts:
 
