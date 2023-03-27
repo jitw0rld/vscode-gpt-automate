@@ -4,6 +4,10 @@
     "description": "Automate tasks by prompting ChatGPT to interact with your workspace.",
     "version": "0.2.3",
     "author": "Ethan Rettinger",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jitw0rld/vscode-gpt-automate.git"
+    },
     "engines": {
         "vscode": "^1.73.0"
     },

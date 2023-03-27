@@ -1,6 +1,5 @@
 const vscode = require('vscode');
 const openai = require('openai');
-const os = require('os');
 const configuration = new openai.Configuration({
     organization: 'org-5SQeLQ8rfWqdoiHmo77XPzir',
     apiKey: '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' // dont steal pls :D
@@ -19,7 +18,7 @@ const PRE_PROMPT = `You are converting prompts into commands. Here are the 6 pos
 
 DO NOT reply with anything other than those 6 commands. You can reply with any command to obey the prompt for EXECUTE_COMMAND.
 The user does not need to be specific so fill in all gaps with reasonable assumptions.
-If parts of text cannot be converted into one of those commands, write INVALID_REQUEST "(reason)" and explain why.
+If parts of text cannot be converted into one of those commands, write INVALID_REQUEST "(reason)" and explain which action and why.
 Add files according to what is needed in the prompt. Commands are delimited with "~."
 Folders are created recursively.
 If file or folder names are not given, make appropriate assumptions about what to create.
@@ -152,7 +151,7 @@ async function parseCommands(result) {
             handleInvalidRequest(command.args.join(' '));
         } else {
             vscode.window.showErrorMessage(
-                `GPT returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
+                `OpenAI returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
             );
         }
     }
@@ -168,11 +167,7 @@ async function handleNewFileCommand(filePath) {
         const rootFolder = workspaceFolders[0].uri;
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
         await vscode.workspace.fs.writeFile(fileUri, new Uint8Array([])).then(
-            () => {
-                vscode.window.showInformationMessage(
-                    `Created new file ${filePath}`
-                );
-            },
+            () => {},
             error => {
                 vscode.window.showErrorMessage(
                     `Error creating file ${filePath}: ${error.message}`
@@ -249,7 +244,7 @@ function handleExecuteCommand(command) {
 
 function handleInvalidRequest(reason) {
     vscode.window.showErrorMessage(
-        `An action could not be completed. Reason: "${reason}"`
+        `One or more action(s) could not be completed. Reason: "${reason}"`
     );
 }
 
