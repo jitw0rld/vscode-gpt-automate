@@ -222,6 +222,7 @@ async function handleWriteToFileCommand(filePath, content) {
     if (workspaceFolders) {
         const rootFolder = workspaceFolders[0].uri;
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
+        content = content.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
         const contentBytes = new TextEncoder().encode(content);
         await vscode.workspace.fs.writeFile(fileUri, contentBytes).then(
             () => {},
