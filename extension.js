@@ -62,6 +62,9 @@ function activate(context) {
     context.subscriptions.push(disposable);
 }
 
+/**
+ * @param {string} text
+ */
 async function queryApi(text) {
     // Query
     let res = '';
@@ -91,6 +94,9 @@ async function queryApi(text) {
     return res;
 }
 
+/**
+ * @param {string} result
+ */
 async function parseCommands(result) {
     // Commands:
     // NEW_FILE "path/to/file.txt"
@@ -100,11 +106,11 @@ async function parseCommands(result) {
     // EXECUTE_COMMAND "shell_command"
     // INVALID_REQUEST "reason"
 
-    let commands = result.split('~.');
-    commands = commands.filter(command => command !== ''); // Remove empty lines
+    let unmappedCommands = result.split('~.');
+    unmappedCommands = unmappedCommands.filter(command => command !== ''); // Remove empty lines
     // if any commands start with a . remove the .
     // The AI does this sometimes. Working on a fix
-    commands = commands.map(command => {
+    unmappedCommands = unmappedCommands.map(command => {
         if (command.startsWith('.')) {
             command = command.slice(1);
         }
@@ -112,7 +118,7 @@ async function parseCommands(result) {
         return command;
     });
 
-    commands = commands.map(command => {
+    let commands = unmappedCommands.map(command => {
         const commandType = command.split(' ')[0];
         let commandArgs = command.split(' ').slice(1);
         // remove double quotes but only if they are at the start and end of the string
@@ -164,6 +170,9 @@ async function parseCommands(result) {
     return;
 }
 
+/**
+ * @param {string} filePath
+ */
 async function handleNewFileCommand(filePath) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
@@ -182,6 +191,9 @@ async function handleNewFileCommand(filePath) {
     }
 }
 
+/**
+ * @param {string} folderPath
+ */
 async function handleNewFolderCommand(folderPath) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
@@ -202,6 +214,9 @@ async function handleNewFolderCommand(folderPath) {
     }
 }
 
+/**
+ * @param {string} filePath
+ */
 async function handleDelFileCommand(filePath) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
@@ -220,6 +235,10 @@ async function handleDelFileCommand(filePath) {
     }
 }
 
+/**
+ * @param {string} filePath
+ * @param {string} content
+ */
 async function handleWriteToFileCommand(filePath, content) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
@@ -240,18 +259,28 @@ async function handleWriteToFileCommand(filePath, content) {
     }
 }
 
+/**
+ * @param {string} command
+ */
 function handleExecuteCommand(command) {
     const terminal = vscode.window.createTerminal();
     terminal.sendText(command.trim().replace('"', ''));
     terminal.show();
 }
 
+/**
+ * @param {string} reason
+ */
 function handleInvalidRequest(reason) {
     vscode.window.showErrorMessage(
         `One or more action(s) could not be completed. Reason: "${reason}"`
     );
 }
 
+/**
+ * @param {string} oldPath
+ * @param {string} newPath
+ */
 async function handleMovePathCommand(oldPath, newPath) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {

@@ -15,7 +15,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:vscode-gpt-automate.prompt"
+        "onCommand:vscode-gpt-automate.prompt",
+        "onView:gptAutomate"
     ],
     "main": "./extension.js",
     "contributes": {
