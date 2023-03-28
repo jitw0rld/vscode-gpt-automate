@@ -1,6 +1,9 @@
+![vscode-gpt-automate](https://user-images.githubusercontent.com/79817320/228329856-d289f84e-234d-463e-baa7-4cc2d14280ef.png)
+
+
 # vscode-gpt-automate
 
-Automatically perform actions with ChatGPT-turbo-3.5. Please do not steal my api key in here lol
+Exponentiate your developer workflow using ChatGPT seamlessly integrated into VSCode.
 
 ## Features
 
