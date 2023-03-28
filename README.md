@@ -25,6 +25,20 @@ Exponentiate your developer workflow using ChatGPT seamlessly integrated into VS
 -   It has a tendency to reject prompts not JavaScript or C related due to the pre-prompt included in the code. This just means be more verbose and it will likely work.
 -   Prompt max length can be reached if you have a very large workspace. This is being fixed.
 
+## Examples
+### Smart File Generation
+![demo_1](https://user-images.githubusercontent.com/79817320/228382472-984a9973-131a-4c77-9634-2709b9f4feb9.gif)
+
+### Workspace Context
+![demo_2](https://user-images.githubusercontent.com/79817320/228382440-a2b5c8dc-03e4-4926-87cb-c1bd33601897.gif)
+
+### Instantly Complete Tedious Tasks
+![demo_3](https://user-images.githubusercontent.com/79817320/228382407-7a842e0e-b28b-467a-af4e-d1e4398e5ca9.gif)
+
+### Workflow Enhancer
+![demo_4](https://user-images.githubusercontent.com/79817320/228382413-65a3b37a-ab25-4feb-8bd7-d2b40b5e75d2.gif)
+
+
 ## How to Install
 
 1. Download the .vsix file
