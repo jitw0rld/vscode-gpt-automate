@@ -7,16 +7,17 @@ const configuration = new openai.Configuration({
 const openapi = new openai.OpenAIApi(configuration);
 const path = require('path');
 let workspaceFiles = '';
-const PRE_PROMPT = `You are converting prompts into commands. Here are the 6 possible commands:
+const PRE_PROMPT = `You are converting prompts into commands. Here are the 7 possible commands:
 
 'NEW_FILE "path/to/file.txt"',
 'NEW_FOLDER "path/to/folder"',
-'DEL_FILE "file.txt"',
+'DEL_PATH "file.txt"',
 'WRITE_TO_FILE "path/to/file.txt" "content"'
 'EXECUTE_COMMAND "shell_command"'
 'INVALID_REQUEST "reason"'
+'MOVE_PATH "path/to/file_or_folder.txt" "path/to/new/file_or_folder.txt"'
 
-DO NOT reply with anything other than those 6 commands. You can reply with any command to obey the prompt for EXECUTE_COMMAND.
+DO NOT reply with anything other than those 10 commands. You can reply with any command to obey the prompt for EXECUTE_COMMAND.
 The user does not need to be specific so fill in all gaps with reasonable assumptions.
 If parts of text cannot be converted into one of those commands, write INVALID_REQUEST "(reason)" and explain which action and why.
 Add files according to what is needed in the prompt. Commands are delimited with "~."
@@ -138,7 +139,7 @@ async function parseCommands(result) {
             await handleNewFileCommand(command.args.join(' '));
         } else if (command.type === 'NEW_FOLDER') {
             await handleNewFolderCommand(command.args.join(' '));
-        } else if (command.type === 'DEL_FILE') {
+        } else if (command.type === 'DEL_PATH') {
             await handleDelFileCommand(command.args.join(' '));
         } else if (command.type === 'WRITE_TO_FILE') {
             await handleWriteToFileCommand(
@@ -149,6 +150,8 @@ async function parseCommands(result) {
             handleExecuteCommand(command.args.join(' '));
         } else if (command.type === 'INVALID_REQUEST') {
             handleInvalidRequest(command.args.join(' '));
+        } else if (command.type === 'MOVE_PATH') {
+            await handleMovePathCommand(command.args[0], command.args[1]);
         } else {
             vscode.window.showErrorMessage(
                 `OpenAI returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
@@ -204,7 +207,7 @@ async function handleDelFileCommand(filePath) {
     if (workspaceFolders) {
         const rootFolder = workspaceFolders[0].uri;
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
-        await vscode.workspace.fs.delete(fileUri, { recursive: false }).then(
+        await vscode.workspace.fs.delete(fileUri, { recursive: true }).then(
             () => {},
             error => {
                 vscode.window.showErrorMessage(
@@ -247,6 +250,25 @@ function handleInvalidRequest(reason) {
     vscode.window.showErrorMessage(
         `One or more action(s) could not be completed. Reason: "${reason}"`
     );
+}
+
+async function handleMovePathCommand(oldPath, newPath) {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders) {
+        const rootFolder = workspaceFolders[0].uri;
+        const oldFileUri = vscode.Uri.joinPath(rootFolder, oldPath);
+        const newFileUri = vscode.Uri.joinPath(rootFolder, newPath);
+        await vscode.workspace.fs.rename(oldFileUri, newFileUri).then(
+            () => {},
+            error => {
+                vscode.window.showErrorMessage(
+                    `Error moving file ${oldPath} to ${newPath}: ${error.message}`
+                );
+            }
+        );
+    } else {
+        vscode.window.showErrorMessage('Error: No workspace folder found.');
+    }
 }
 
 async function getWorkspaceFiles() {
