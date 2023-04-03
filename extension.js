@@ -1,5 +1,7 @@
 const vscode = require('vscode');
 const request = require('request');
+const path = require('path');
+
 let workspaceFiles = '';
 
 const api = 'https://ethanmrettinger.dev';
