@@ -20,7 +20,6 @@ function activate(context) {
                     `Processing input: '${input}'...`
                 );
                 await getWorkspaceFiles();
-                console.warn('Context Prompt: ', CTX_PROMPT);
                 const result = await queryApi(input);
                 await parseCommands(result);
             }
