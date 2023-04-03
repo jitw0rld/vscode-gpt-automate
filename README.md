@@ -1,9 +1,14 @@
 ![vscode-gpt-automate](https://user-images.githubusercontent.com/79817320/228329856-d289f84e-234d-463e-baa7-4cc2d14280ef.png)
 
-
 # vscode-gpt-automate 🤖
 
 Exponentiate your developer workflow using ChatGPT seamlessly integrated into VSCode.
+
+Public beta lasts until **4/17/2023**. Here is a free api key.
+`bb9bf2e8-4cbd-4550-af69-e55da038729a`
+
+**This API key will expire on 4/17/2023**.
+Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 
 ## Features 🔥
 
@@ -26,18 +31,22 @@ Exponentiate your developer workflow using ChatGPT seamlessly integrated into VS
 -   ❌ Prompt max length can be reached if you have a very large workspace. This is being fixed.
 
 ## Examples 📒
+
 ### Smart File Generation 📂
+
 ![demo_1](https://user-images.githubusercontent.com/79817320/228382472-984a9973-131a-4c77-9634-2709b9f4feb9.gif)
 
 ### Workspace Context 🧠
+
 ![demo_2](https://user-images.githubusercontent.com/79817320/228382440-a2b5c8dc-03e4-4926-87cb-c1bd33601897.gif)
 
 ### Instantly Complete Tedious Tasks 😴
+
 ![demo_3](https://user-images.githubusercontent.com/79817320/228382407-7a842e0e-b28b-467a-af4e-d1e4398e5ca9.gif)
 
 ### Workflow Enhancer ⏩
-![demo_4](https://user-images.githubusercontent.com/79817320/228382413-65a3b37a-ab25-4feb-8bd7-d2b40b5e75d2.gif)
 
+![demo_4](https://user-images.githubusercontent.com/79817320/228382413-65a3b37a-ab25-4feb-8bd7-d2b40b5e75d2.gif)
 
 ## How to Install 📦
 
@@ -60,7 +69,7 @@ Exponentiate your developer workflow using ChatGPT seamlessly integrated into VS
 7. If your prompt is rejected you will get an `INVALID_REQUEST` error, so try again.
 8. If your prompt contains vulgarity or is very long OR if your workspace is very large (file-count wise) you will get a 400 error from OpenAI. Fix is being implemented
 
-While it *may* be able to deliver on bad prompts, it's **generally recommended** to stick with good prompt conventions to get more reliable results.
+While it _may_ be able to deliver on bad prompts, it's **generally recommended** to stick with good prompt conventions to get more reliable results.
 
 ## How to write Good Prompts
 
