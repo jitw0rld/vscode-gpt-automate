@@ -1,41 +1,8 @@
 const vscode = require('vscode');
-const openai = require('openai');
-const configuration = new openai.Configuration({
-    organization: 'org-5SQeLQ8rfWqdoiHmo77XPzir',
-    apiKey: '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' // dont steal pls :D
-});
-const openapi = new openai.OpenAIApi(configuration);
-const path = require('path');
+const request = require('request');
 let workspaceFiles = '';
-const PRE_PROMPT = `You are converting prompts into commands. Here are the 7 possible commands:
 
-'NEW_FILE "path/to/file.txt"',
-'NEW_FOLDER "path/to/folder"',
-'DEL_PATH "file.txt"',
-'WRITE_TO_FILE "path/to/file.txt" "content"'
-'EXECUTE_COMMAND "shell_command"'
-'INVALID_REQUEST "reason"'
-'MOVE_PATH "path/to/file_or_folder.txt" "path/to/new/file_or_folder.txt"'
-
-DO NOT reply with anything other than those 10 commands. You can reply with any command to obey the prompt for EXECUTE_COMMAND.
-The user does not need to be specific so fill in all gaps with reasonable assumptions.
-If parts of text cannot be converted into one of those commands, write INVALID_REQUEST "(reason)" and explain which action and why.
-Add files according to what is needed in the prompt. Commands are delimited with "~."
-Folders are created recursively.
-If file or folder names are not given, make appropriate assumptions about what to create.
-Prefix unspecified paths with ./ because the current working directory is where files will be created.
-Do not add single quotes to code or file names. Try to format all code correctly.
-The user does not need to be specific. Fill in all gaps with reasonable assumptions.
-Do not minify code, try to format it as much as possible with tabs and newline chars. 
-
-Example prompt: "Setup the files for an express app in nodejs."
-NEW_FOLDER "./public"~.NEW_FOLDER "./public/css"~.NEW_FOLDER "./public/js"~.NEW_FILE "./public/index.html"~.NEW_FILE "./public/js/script.js"~.NEW_FILE "./public/css/styles.css"~.WRITE_TO_FILE "./public/index.html" "<h1>My Example Application</h1>"~.WRITE_TO_FILE "./public/js/script.js" "console.log('Hello, world!');"~.WRITE_TO_FILE "./public/css/styles.css" "body { background-color: #000; }"~.EXECUTE_COMMAND "npm init -y"~.EXECUTE_COMMAND "npm install express"~.NEW_FILE "./index.js"
-
-Example 2: "Initialize a C app"
-NEW_FOLDER "./c-app"~.NEW_FILE "./c-app/main.c"~.WRITE_TO_FILE "./c-app/main.c" "int #include <stdio.h>\nint main() {\n\tprintf("Hello, world!");\n\n\treturn 0;\n}"\n
-`;
-
-let CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}`;
+const api = 'https://ethanmrettinger.dev';
 
 /**
  * @param {{ subscriptions: vscode.Disposable[]; }} context
@@ -53,7 +20,6 @@ function activate(context) {
                     `Processing input: '${input}'...`
                 );
                 await getWorkspaceFiles();
-                console.warn('Context Prompt: ', CTX_PROMPT);
                 const result = await queryApi(input);
                 await parseCommands(result);
             }
@@ -62,36 +28,50 @@ function activate(context) {
     context.subscriptions.push(disposable);
 }
 
+function getApiKey() {
+    const config = vscode.workspace.getConfiguration('vscode-gpt-automate');
+    const apiKey = config.get('apiKey');
+    return apiKey;
+}
+
 /**
  * @param {string} text
  */
-async function queryApi(text) {
-    // Query
-    let res = '';
-    await openapi
-        .createChatCompletion({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    role: 'user',
-                    content: PRE_PROMPT + CTX_PROMPT + ` Your Prompt: ${text}`
-                }
-            ]
-        })
-        .then(
-            data => {
-                res = data.data.choices[0].message.content;
-            },
-            error => {
-                vscode.window.showErrorMessage(
-                    `Error querying OpenAI API: ${error.message}`
-                );
-                console.log('\n\nERROR QUERYING OPENAI vvvvvvvvv\n\n');
-                console.error(error.response.data);
-            }
-        );
 
-    return res;
+async function queryApi(text) {
+    const apiKey = vscode.workspace
+        .getConfiguration('vscode-gpt-automate')
+        .get('apiKey');
+
+    if (!apiKey) {
+        vscode.window.showErrorMessage(
+            'Error: No API key found. Please set one in the extension settings.'
+        );
+        return;
+    }
+
+    const options = {
+        url: `${api}/api`,
+        method: 'POST',
+        headers: {
+            'x-api-key': getApiKey()
+        },
+        json: {
+            prompt: text,
+            workspaceFiles: workspaceFiles
+        }
+    };
+
+    return new Promise((resolve, reject) => {
+        request(options, (error, response, body) => {
+            if (error) {
+                vscode.window.showErrorMessage(`Error: ${error.message}`);
+                reject(error);
+            } else {
+                resolve(body);
+            }
+        });
+    });
 }
 
 /**
@@ -156,7 +136,7 @@ async function parseCommands(result) {
             handleExecuteCommand(command.args.join(' '));
         } else if (command.type === 'INVALID_REQUEST') {
             handleInvalidRequest(command.args.join(' '));
-        } else if (command.type === 'MOVE_PATH') {
+        } else if (command.type === 'MOV_PATH') {
             await handleMovePathCommand(command.args[0], command.args[1]);
         } else {
             vscode.window.showErrorMessage(
@@ -245,6 +225,7 @@ async function handleWriteToFileCommand(filePath, content) {
         const rootFolder = workspaceFolders[0].uri;
         const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
         content = content.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+        content = content.replace('\\"', '"');
         const contentBytes = new TextEncoder().encode(content);
         await vscode.workspace.fs.writeFile(fileUri, contentBytes).then(
             () => {},
@@ -312,12 +293,10 @@ async function getWorkspaceFiles() {
     );
 
     const fileNames = files.map(file => {
-        return `'${path.relative(vscode.workspace.rootPath, file.fsPath)}'`;
+        return `'./${path.relative(vscode.workspace.rootPath, file.fsPath)}'`;
     });
 
-    const workspaceFiles = `${fileNames.join('\n')}\n`;
-    CTX_PROMPT = `Files currently in the workspace: ${workspaceFiles}`;
-    console.log('Workspace Files:' + workspaceFiles);
+    workspaceFiles = `${fileNames.join('\n')}\n`;
 }
 
 getWorkspaceFiles();
