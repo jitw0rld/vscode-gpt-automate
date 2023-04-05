@@ -15,15 +15,36 @@ function activate(context) {
         async () => {
             const input = await vscode.window.showInputBox({
                 placeHolder: 'Setup the files for an express app in nodejs.',
-                prompt: 'Please enter some text to process with the VSCode GPT Automate extension'
+                prompt: 'Please enter a task to complete using AI.'
             });
             if (input) {
-                vscode.window.showInformationMessage(
-                    `Processing input: '${input}'...`
+                await vscode.window.withProgress(
+                    {
+                        location: vscode.ProgressLocation.Notification,
+                        title: 'Processing prompt...',
+                        cancellable: false
+                    },
+                    async (progress, token) => {
+                        progress.report({
+                            increment: 0,
+                            message: 'Getting workspace files...'
+                        });
+                        await getWorkspaceFiles();
+                        progress.report({
+                            increment: 50,
+                            message: 'Sending prompt to API...'
+                        });
+                        const result = await queryApi(input);
+                        progress.report({
+                            increment: 95,
+                            message: 'Processing result...'
+                        });
+                        await parseCommands(result);
+                        progress.report({ increment: 100 });
+                    }
                 );
-                await getWorkspaceFiles();
-                const result = await queryApi(input);
-                await parseCommands(result);
+
+                vscode.window.showInformationMessage('Done!');
             }
         }
     );
@@ -66,8 +87,18 @@ async function queryApi(text) {
 
     return new Promise((resolve, reject) => {
         request(options, (error, response, body) => {
+            // if response has an error, response body will have err property set to true
+            console.log('Body: ' + JSON.stringify(body, null, 2));
+            console.log(
+                'Response body: ' + JSON.stringify(response.body, null, 2)
+            );
             if (error) {
                 vscode.window.showErrorMessage(`Error: ${error.message}`);
+                reject(error);
+            } else if (body.err) {
+                vscode.window.showErrorMessage(
+                    `Error: ${response.body.errMessage}`
+                );
                 reject(error);
             } else {
                 resolve(body);
@@ -146,9 +177,6 @@ async function parseCommands(result) {
             );
         }
     }
-
-    vscode.window.showInformationMessage(`Completed ${commands.length} tasks!`);
-
     return;
 }
 
