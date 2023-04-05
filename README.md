@@ -48,17 +48,39 @@ Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 
 ![demo_4](https://user-images.githubusercontent.com/79817320/228382413-65a3b37a-ab25-4feb-8bd7-d2b40b5e75d2.gif)
 
-## How to Install 📦
+## Installation 📦
 
-1. Download the `.vsix` file
-2. Open `Visual Studio Code`
-3. Press `Ctrl+Shift+X`
-4. Click the 3 dots in the top right corner
-5. Click `Install from VSIX...`
-6. Select the `.vsix` file
-7. Reload Visual Studio Code
+### Visual Studio Code
+
+1. Search `vscode-gpt-automate` in the Extensions marketplace
+2. Click Install
+3. Navigate to settings, and under **Extensions > GPT Automate** (or search `vscode-gpt-automate`), set your API key.
+4. Reload VSCode if necessary
+
+### Neovim
+
+1. Install pynvim: `pip install pynvim`
+2. Create a folder inside `~/.config/nvim/plugged` called `gpt-automate-nvim` (On windows, it's `~\AppData\Local\nvim-data\plugged`)
+3. Import `nvim-plugin/gpt-automate.py` into `~/.config/nvim/plugged/gpt-automate-nvim`
+
+4. Enter this line between `plug#begin()` and `plug#end()` in your `init.vim` file:
+
+```vim
+Plug 'Plug '~/gpt-automate-nvim'
+```
+
+5. Set your API key in init.vim
+
+```vim
+let g:vscode_gpt_automate_api_key = "<your_api_key_here>"
+```
+
+6. Run `:source $MYVIMRC` to reload your `init.vim` file
+7. Run `:PlugInstall` to install the plugin
 
 ## How to Use 📝
+
+### Visual Studio Code
 
 1. Open a workspace
 2. Press `CTRL+SHIFT+P`
@@ -66,8 +88,13 @@ Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 4. Select `GPT Automate Prompt`
 5. Type your prompt
 6. Press Enter
-7. If your prompt is rejected you will get an `INVALID_REQUEST` error, so try again.
-8. If your prompt contains vulgarity or is very long OR if your workspace is very large (file-count wise) you will get a 400 error from OpenAI. Fix is being implemented
+
+### Neovim
+
+1. Open a workspace
+2. Type `:GPTAutomatePrompt`
+3. Type your prompt
+4. Press Enter
 
 While it _may_ be able to deliver on bad prompts, it's **generally recommended** to stick with good prompt conventions to get more reliable results.
 
