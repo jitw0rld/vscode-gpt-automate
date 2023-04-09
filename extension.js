@@ -164,7 +164,7 @@ async function parseCommands(result) {
         } else if (command.type === 'WRITE_TO_FILE') {
             await handleWriteToFileCommand(
                 command.args[0],
-                command.args.slice(1).join(' ')
+                command.args.slice(1).join(' ').replace(/\\"/g, '"')
             );
         } else if (command.type === 'EXECUTE_COMMAND') {
             handleExecuteCommand(command.args.join(' '));
