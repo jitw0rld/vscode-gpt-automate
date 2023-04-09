@@ -118,6 +118,7 @@ async function parseCommands(result) {
     // WRITE_TO_FILE "path/to/file.txt" "content"
     // EXECUTE_COMMAND "shell_command"
     // INVALID_REQUEST "reason"
+    // APPEND_TO_FILE "path/to/file.txt" "content"
 
     let unmappedCommands = result.split('~.');
     unmappedCommands = unmappedCommands.filter(command => command !== ''); // Remove empty lines
@@ -171,6 +172,11 @@ async function parseCommands(result) {
             handleInvalidRequest(command.args.join(' '));
         } else if (command.type === 'MOV_PATH') {
             await handleMovePathCommand(command.args[0], command.args[1]);
+        } else if (command.type === 'APPEND_TO_FILE') {
+            await handleAppendToFileCommand(
+                command.args[0],
+                command.args.slice(1).join(' ')
+            );
         } else {
             vscode.window.showErrorMessage(
                 `OpenAI returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
@@ -311,6 +317,33 @@ async function handleMovePathCommand(oldPath, newPath) {
     }
 }
 
+async function handleAppendToFileCommand(filePath, content) {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders) {
+        const rootFolder = workspaceFolders[0].uri;
+        const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
+        try {
+            const existingContentBytes = await vscode.workspace.fs.readFile(
+                fileUri
+            );
+            const existingContent = new TextDecoder().decode(
+                existingContentBytes
+            );
+
+            content = content.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+            content = existingContent + content;
+            const contentBytes = new TextEncoder().encode(content);
+
+            await vscode.workspace.fs.writeFile(fileUri, contentBytes);
+        } catch (error) {
+            vscode.window.showErrorMessage(
+                `Error appending to file ${filePath}: ${error.message}`
+            );
+        }
+    } else {
+        vscode.window.showErrorMessage('Error: No workspace folder found.');
+    }
+}
 async function getWorkspaceFiles() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {

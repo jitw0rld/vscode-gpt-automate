@@ -57,7 +57,7 @@ Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 3. Navigate to settings, and under **Extensions > GPT Automate** (or search `vscode-gpt-automate`), set your API key.
 4. Reload VSCode if necessary
 
-### Neovim
+### Neovim (Not yet ready)
 
 1. Install pynvim: `pip install pynvim`
 2. Create a folder inside `~/.config/nvim/plugged` called `gpt-automate-nvim` (On windows, it's `~\AppData\Local\nvim-data\plugged`)
