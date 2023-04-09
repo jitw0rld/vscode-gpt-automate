@@ -20,7 +20,7 @@
         "onCommand:vscode-gpt-automate.prompt",
         "onView:gptAutomate"
     ],
-    "main": "./extension.js",
+    "main": "./src/vscode-gpt-automate.js",
     "contributes": {
         "commands": [
             {
@@ -35,6 +35,15 @@
                     "type": "string",
                     "default": "",
                     "description": "VSCode GPT Automate API key"
+                },
+                "vscode-gpt-automate.model": {
+                    "type": "string",
+                    "default": "GPT-3.5",
+                    "enum": [
+                        "GPT-3.5",
+                        "GPT-4"
+                    ],
+                    "description": "Choose the AI model to use. GPT-4 is closed-access. It is slower and more expensive, but much more accurate and intelligent. Soon, it will be able to understand code within files. GPT-3.5 is faster and cheaper, but less accurate and intelligent."
                 }
             }
         }
