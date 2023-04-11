@@ -12,8 +12,16 @@ function getApiKey() {
 /**
  * @param {string} text
  * @param {string} workspaceFiles
+ * @param {boolean} isRFCHandshake
+ * @param {string} rfcContent
+ * @returns {Promise<string>}
  */
-async function queryApi(text, workspaceFiles) {
+async function queryApi(
+    text,
+    workspaceFiles,
+    isRFCHandshake = false,
+    rfcContent = ''
+) {
     const apiKey = getApiKey();
 
     if (!apiKey) {
@@ -34,17 +42,14 @@ async function queryApi(text, workspaceFiles) {
             workspaceFiles: workspaceFiles,
             model: vscode.workspace
                 .getConfiguration('vscode-gpt-automate')
-                .get('model')
+                .get('model'),
+            rfc: isRFCHandshake,
+            rfcContent: rfcContent
         }
     };
 
     return new Promise((resolve, reject) => {
         request(options, (error, response, body) => {
-            // if response has an error, response body will have err property set to true
-            console.log('Body: ' + JSON.stringify(body, null, 2));
-            console.log(
-                'Response body: ' + JSON.stringify(response.body, null, 2)
-            );
             if (error) {
                 vscode.window.showErrorMessage(`Error: ${error.message}`);
                 reject(error);
