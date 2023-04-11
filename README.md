@@ -4,10 +4,9 @@
 
 Exponentiate your developer workflow using ChatGPT seamlessly integrated into VSCode.
 
-Public beta lasts until **4/17/2023**. Here is a free api key.
-`bb9bf2e8-4cbd-4550-af69-e55da038729a`
+Here is a **FREE** API key that is usable for the duration of the Public Beta:
+```bb9bf2e8-4cbd-4550-af69-e55da038729a```
 
-**This API key will expire on 4/17/2023**.
 Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 
 ## Features 🔥
@@ -57,27 +56,6 @@ Email me to register for a new key (`ethan@ethanmrettinger.dev`)
 3. Navigate to settings, and under **Extensions > GPT Automate** (or search `vscode-gpt-automate`), set your API key.
 4. Reload VSCode if necessary
 
-### Neovim (Not yet ready)
-
-1. Install pynvim: `pip install pynvim`
-2. Create a folder inside `~/.config/nvim/plugged` called `gpt-automate-nvim` (On windows, it's `~\AppData\Local\nvim-data\plugged`)
-3. Import `nvim-plugin/gpt-automate.py` into `~/.config/nvim/plugged/gpt-automate-nvim`
-
-4. Enter this line between `plug#begin()` and `plug#end()` in your `init.vim` file:
-
-```vim
-Plug 'Plug '~/gpt-automate-nvim'
-```
-
-5. Set your API key in init.vim
-
-```vim
-let g:vscode_gpt_automate_api_key = "<your_api_key_here>"
-```
-
-6. Run `:source $MYVIMRC` to reload your `init.vim` file
-7. Run `:PlugInstall` to install the plugin
-
 ## How to Use 📝
 
 ### Visual Studio Code
@@ -88,13 +66,6 @@ let g:vscode_gpt_automate_api_key = "<your_api_key_here>"
 4. Select `GPT Automate Prompt`
 5. Type your prompt
 6. Press Enter
-
-### Neovim
-
-1. Open a workspace
-2. Type `:GPTAutomatePrompt`
-3. Type your prompt
-4. Press Enter
 
 While it _may_ be able to deliver on bad prompts, it's **generally recommended** to stick with good prompt conventions to get more reliable results.
 
