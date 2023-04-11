@@ -14,6 +14,7 @@
         "vscode": "^1.73.0"
     },
     "categories": [
+        "Machine Learning",
         "Other"
     ],
     "activationEvents": [
@@ -22,12 +23,29 @@
     ],
     "main": "./src/vscode-gpt-automate.js",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "vscode-gpt-automate",
+                    "title": "GPT Automate",
+                    "icon": "vscode-gpt-automate-logo-svg.svg"
+                }
+            ]
+        },
         "commands": [
             {
                 "command": "vscode-gpt-automate.prompt",
                 "title": "GPT Automate Prompt"
             }
         ],
+        "views": {
+            "vscode-gpt-automate": [
+                {
+                    "id": "gptAutomate",
+                    "name": "GPT Automate"
+                }
+            ]
+        },
         "configuration": {
             "title": "GPT Automate",
             "properties": {
