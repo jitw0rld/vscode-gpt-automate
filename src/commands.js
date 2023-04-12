@@ -113,24 +113,6 @@ async function handleAppendToFileCommand(filePath, content) {
         );
     }
 }
-async function getFirst1kCharsOfFile(filePath) {
-    const rootFolder = getWorkspaceRootFolder();
-    if (!rootFolder) return;
-
-    const fileUri = vscode.Uri.joinPath(rootFolder, filePath);
-
-    try {
-        const contentBytes = await vscode.workspace.fs.readFile(fileUri);
-        const content = new TextDecoder().decode(contentBytes);
-        const first1kChars = content.slice(0, 1000);
-        return first1kChars;
-    } catch (error) {
-        vscode.window.showErrorMessage(
-            `Error reading from file ${filePath}: ${error.message}`
-        );
-        return null;
-    }
-}
 
 function getWorkspaceRootFolder() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -194,12 +176,12 @@ async function parseCommands(result) {
                     command.args.slice(1).join(' ')
                 );
                 break;
+            case 'RFC':
+                break;
             default:
                 vscode.window.showErrorMessage(
                     `OpenAI returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
                 );
-
-                vscode.window.showErrorMessage('Res', result);
         }
     }
 }
@@ -214,5 +196,5 @@ module.exports = {
     handleMovePathCommand,
     handleAppendToFileCommand,
     parseCommands,
-    getFirst1kCharsOfFile
+    getWorkspaceRootFolder
 };
