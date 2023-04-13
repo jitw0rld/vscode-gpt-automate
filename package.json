@@ -2,7 +2,7 @@
     "name": "vscode-gpt-automate",
     "displayName": "VSCode GPT Automate",
     "description": "Automate tasks by prompting ChatGPT to interact with your workspace.",
-    "version": "0.4.3",
+    "version": "0.5.0",
     "author": "Ethan Rettinger",
     "publisher": "ethanrjs",
     "repository": {
@@ -49,20 +49,17 @@
             }
         }
     },
-    "scripts": {
-        "lint": "eslint .",
-        "pretest": "npm run lint"
-    },
+    "scripts": {},
     "devDependencies": {
         "@types/glob": "^8.1.0",
         "@types/mocha": "^10.0.1",
         "@types/node": "16.x",
         "@types/vscode": "^1.73.0",
         "@vscode/test-electron": "^2.2.3",
+        "esbuild": "^0.17.16",
         "eslint": "^8.34.0",
         "glob": "^8.1.0",
-        "mocha": "^10.2.0",
-        "typescript": "^4.9.5"
+        "mocha": "^10.2.0"
     },
     "dependencies": {
         "openai": "^3.2.1",
