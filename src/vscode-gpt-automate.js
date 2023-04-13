@@ -2,7 +2,7 @@
 const vscode = require('vscode');
 const path = require('path');
 const { queryApi } = require('./api.js');
-const { parseCommands, getFirst1kCharsOfFile } = require('./commands.js');
+const { parseCommands, getWorkspaceRootFolder } = require('./commands.js');
 
 let workspaceFiles = '';
 
@@ -58,10 +58,18 @@ function activate(context) {
                             const path = result.trim().split('"')[1].trim();
 
                             console.log('path', path);
-                            // read first 2048 characters of file
-                            const content = await getFirst1kCharsOfFile(path);
-                            console.log('content', content);
-                            // queryApi
+
+                            const rootFolder = getWorkspaceRootFolder();
+                            if (!rootFolder) return;
+
+                            const folderUri = vscode.Uri.joinPath(
+                                rootFolder,
+                                path
+                            );
+
+                            const text = new TextDecoder().decode(
+                                await vscode.workspace.fs.readFile(folderUri)
+                            );
 
                             progress.report({
                                 increment: 80,
@@ -73,12 +81,13 @@ function activate(context) {
                                 input,
                                 workspaceFiles,
                                 true,
-                                content
+                                text
                             );
                             progress.report({
                                 increment: 95,
                                 message: 'Processing result...'
                             });
+                            console.log('rfc reply', rfcReply);
                             await parseCommands(rfcReply);
                             progress.report({ increment: 100 });
                         } else {
