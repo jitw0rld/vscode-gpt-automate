@@ -52,6 +52,7 @@ async function handleWriteToFileCommand(filePath, content) {
         .replace(/\\n/g, '\n')
         .replace(/\\t/g, '\t')
         .replace(/\\\"/g, '"');
+
     const contentBytes = new TextEncoder().encode(content);
 
     try {
@@ -128,7 +129,7 @@ function getWorkspaceRootFolder() {
  */
 async function parseCommands(result) {
     const commands = result
-        .split('~.')
+        .split('~~')
         .filter(command => command !== '')
         .map(command => {
             if (command.startsWith('.')) {
@@ -137,11 +138,14 @@ async function parseCommands(result) {
 
             const commandParts = command.split(' ');
             const commandType = commandParts[0];
-            const commandArgs = commandParts
+            let commandArgs = commandParts
                 .slice(1)
-                .map(arg => arg.replace(/^"|"$/g, ''));
+                .map(arg => arg.replace(/^"|"$/g, '').trim());
 
-            return { type: commandType, args: commandArgs };
+            // if any args are surrounded in ', remove the 's
+            commandArgs = commandArgs.map(arg => arg.replace(/^'|'$/g, ''));
+
+            return { type: commandType.trim(), args: commandArgs };
         });
 
     for (const command of commands) {
@@ -149,13 +153,19 @@ async function parseCommands(result) {
             case 'NEW_FILE':
                 await handleNewFileCommand(command.args.join(' '));
                 break;
+            case 'APPEND_FILE':
+                await handleAppendToFileCommand(
+                    command.args[0],
+                    command.args.slice(1).join(' ')
+                );
+                break;
             case 'NEW_FOLDER':
                 await handleNewFolderCommand(command.args.join(' '));
                 break;
             case 'DEL_PATH':
                 await handleDelFileCommand(command.args.join(' '));
                 break;
-            case 'WRITE_TO_FILE':
+            case 'WRITE_FILE':
                 await handleWriteToFileCommand(
                     command.args[0],
                     command.args.slice(1).join(' ').replace(/\\"/g, '"')
@@ -170,17 +180,32 @@ async function parseCommands(result) {
             case 'MOV_PATH':
                 await handleMovePathCommand(command.args[0], command.args[1]);
                 break;
-            case 'APPEND_TO_FILE':
-                await handleAppendToFileCommand(
-                    command.args[0],
-                    command.args.slice(1).join(' ')
+
+            case 'OPEN_FILE_AT_LINE':
+                vscode.window.showTextDocument(
+                    vscode.Uri.joinPath(
+                        getWorkspaceRootFolder(),
+                        command.args[0]
+                    ),
+                    {
+                        selection: new vscode.Range(
+                            new vscode.Position(
+                                parseInt(command.args[1]) - 1,
+                                0
+                            ),
+                            new vscode.Position(
+                                parseInt(command.args[1]) - 1,
+                                0
+                            )
+                        )
+                    }
                 );
                 break;
             case 'RFC':
                 break;
             default:
                 vscode.window.showErrorMessage(
-                    `OpenAI returned an invalid command: ${command.type} (Make an issue on GitHub if this happens a lot!)`
+                    `API returned an invalid command: "${command.type}"`
                 );
         }
     }

@@ -45,7 +45,8 @@ async function queryApi(
                 .get('model'),
             rfc: isRFCHandshake,
             rfcContent: rfcContent
-        }
+        },
+        timeout: 65000
     };
 
     return new Promise((resolve, reject) => {
@@ -55,10 +56,11 @@ async function queryApi(
                 reject(error);
             } else if (body.err) {
                 vscode.window.showErrorMessage(
-                    `Error: ${response.body.errMessage}`
+                    `Error: ${response.body.error.message}`
                 );
                 reject(error);
             } else {
+                console.log(body);
                 resolve(body);
             }
         });
